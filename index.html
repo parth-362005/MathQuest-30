@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slider Puzzle Game</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  color: white;
+}
+
+h1 { margin: 20px; }
+
+#game {
+  display: grid;
+  gap: 5px;
+  margin: 20px;
+}
+
+.tile {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  color: #333;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tile:hover { background: #ddd; }
+
+.empty { background: transparent; cursor: default; }
+
+#controls {
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #ffcc00;
+}
+
+button:hover { background: #ffaa00; }
+
+#level {
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<h1>Slider Puzzle</h1>
+<div id="level">Level: 1</div>
+<div id="game"></div>
+<div id="controls">
+  <button onclick="shuffle()">Shuffle</button>
+</div>
+
+<script>
+let size = 3;
+let level = 1;
+let maxLevels = 30;
+let tiles = [];
+
+function init() {
+  size = Math.min(3 + Math.floor(level/5), 6); // increase grid size
+  createTiles();
+  render();
+}
+
+function createTiles() {
+  tiles = [];
+  for (let i = 1; i < size*size; i++) tiles.push(i);
+  tiles.push("");
+}
+
+function render() {
+  const game = document.getElementById("game");
+  game.style.gridTemplateColumns = `repeat(${size}, 70px)`;
+  game.innerHTML = "";
+
+  tiles.forEach((tile, i) => {
+    const div = document.createElement("div");
+    div.className = "tile";
+    if (tile === "") div.classList.add("empty");
+    div.innerText = tile;
+    div.onclick = () => move(i);
+    game.appendChild(div);
+  });
+
+  document.getElementById("level").innerText = "Level: " + level;
+}
+
+function move(index) {
+  const emptyIndex = tiles.indexOf("");
+  const validMoves = [
+    emptyIndex - 1,
+    emptyIndex + 1,
+    emptyIndex - size,
+    emptyIndex + size
+  ];
+
+  if (validMoves.includes(index)) {
+    [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+    render();
+    checkWin();
+  }
+}
+
+function shuffle() {
+  for (let i = tiles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+  }
+  render();
+}
+
+function checkWin() {
+  for (let i = 0; i < tiles.length - 1; i++) {
+    if (tiles[i] !== i + 1) return;
+  }
+
+  setTimeout(() => {
+    alert("Level " + level + " Complete!");
+    level++;
+    if (level > maxLevels) {
+      alert("You completed all levels!");
+      level = 1;
+    }
+    init();
+    shuffle();
+  }, 200);
+}
+
+init();
+shuffle();
+</script>
+
+</body>
+</html>
